@@ -55,6 +55,8 @@ bool RHReliableDatagram::sendtoWait(uint8_t* buf, uint8_t len, uint8_t address)
 	setHeaderId(thisSequenceNumber);
 	setHeaderFlags(RH_FLAGS_NONE, RH_FLAGS_ACK); // Clear the ACK flag
 	sendto(buf, len, address);
+  //NOTE: for norther widget library, this waitPacketSent call is where we are
+  //deadlocking.
 	waitPacketSent();
 
 	// Never wait for ACKS to broadcasts:
@@ -92,7 +94,10 @@ bool RHReliableDatagram::sendtoWait(uint8_t* buf, uint8_t len, uint8_t address)
 			// Its the ACK we are waiting for
 			return true;
 		    }
-        //ignore re-acknowledge we don't care about duplicates
+      //  NOTE: for northen widget library
+      //  using seenIds will break our network structure
+      //  ignore re-acknowledge we don't care about duplicates
+      //
 		  //   else if (!(flags & RH_FLAGS_ACK)
 			// 	&& (id == _seenIds[from]))
 		  //   {
@@ -133,7 +138,10 @@ bool RHReliableDatagram::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* from, 
 		// Acknowledge message with ACK set in flags and ID set to received ID
 		acknowledge(_id, _from);
 	    }
-	    // If we have not seen this message before, then we are interested in it
+	  // If we have not seen this message before, then we are interested in it
+    //  NOTE: for northen widget library
+    //  using seenIds will break our network structure
+    //  just accept all packets, we do not mind getting duplicate packates
 	  //   if (_id != _seenIds[_from])
 	  //   {
 		if (from)  *from =  _from;
@@ -141,10 +149,9 @@ bool RHReliableDatagram::recvfromAck(uint8_t* buf, uint8_t* len, uint8_t* from, 
 		if (id)    *id =    _id;
 		if (flags) *flags = _flags;
 		// _seenIds[_from] = _id;
-		// return true;
+		return true;
 	  //   }
-    return true; //we do not care about duplicates
-	    // Else just re-ack it and wait for a new one
+	  // Else just re-ack it and wait for a new one
 	}
     }
     // No message for us available

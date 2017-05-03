@@ -169,15 +169,15 @@ void Network::droppedCoord(){
 
 void Network::runNetwork()
 {
-    //wake up radio
+    //wake up radio, didn't look at how to do this, probibly a mode change of some sort
     this->noPacketReceived = 0;
     Packet *p = new Packet();
     if(this->amCoord){
 		    //listen
-        //TODO figure out these timeouts, there are infinite ways to do them,
-        //but I think this way will work: have a counter on the number of times
-        //a packet was not received and once it exceeds COORDLISTENTIMEOUT then
-        //stop listening we also tune the sleeps accordingly.
+
+        //TODO: Take the coord data out of the queue (similar to haveCoord), and
+        //upload to server.
+
         while(noPacketReceived < COORDLISTENTIMEOUT){
             if(readPacket(p) != NOMESSAGE){
                 receivedPacket(p);
@@ -185,13 +185,10 @@ void Network::runNetwork()
             else{
                 ++noPacketReceived;
             }
-            delay(10);
-            //TODO sleep for some amount of time. Can change the sleep time depending
-            //on whether or not we received a packet.
         }
 	}
 	else if(this->haveCoord){
-		    //send yourdata
+		    //send your data
         uint8_t data[MAXDATASIZE];
         uint8_t index;
         long d;
@@ -214,17 +211,17 @@ void Network::runNetwork()
               return;
             }
         }
-		    // //listen forward
-        // bool dropped = false;
-        // while(readPacket(p) == SUCCESS){
-        //     if(receivedPacket(p) == DROPPED){
-        //       dropped = true;
-        //       break;
-        //     }
-        // }
-        // if(dropped){
-        //   droppedCoord();
-        // }
+		    //listen forward
+        bool dropped = false;
+        while(readPacket(p) == SUCCESS){
+            if(receivedPacket(p) == DROPPED){
+              dropped = true;
+              break;
+            }
+        }
+        if(dropped){
+          droppedCoord();
+        }
 	}
 	else{
         //TODO: While not reconnected?
@@ -246,6 +243,7 @@ void Network::runNetwork()
         }
 	}
   delete p;
+  //radio.sleep();
 }
 
 long Network::receivedPacket(Packet* p)
@@ -257,9 +255,6 @@ long Network::receivedPacket(Packet* p)
       switch(opCode){
         case DTRANSMISSION:
           //TODO: upload to server;
-      	  // for(int i = 0; i < p->getdSize(); i++){
-          //       	Serial.println(p->getData(i));
-      	  // }
           #ifdef DEBUG
           Serial.print("Received data from: ");
           Serial.println(p->getsAddr());
@@ -303,6 +298,14 @@ long Network::receivedPacket(Packet* p)
           #endif
           failedSend = 0;
           p->setdAddr(this->nextHop);
+          if(p->getData(0) == this->myID){
+            #ifdef DEBUG
+            Serial.println("The data received belongs to us, we are stuck in a loop, drop coord");
+            #endif
+            createPacket(DROPPEDCOORD, this->myID, p->getsAddr(), 0, NULL, p);
+            sendPacket(p);
+            return DROPPED;
+          }
           if(sendPacket(p) == NOACK){
             #ifdef DEBUG
             Serial.println("Failed to send, dropped coord");
