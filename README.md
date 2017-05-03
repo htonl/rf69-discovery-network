@@ -86,7 +86,4 @@ eliminates a lot of the timing issues, and the need for each node to know the
 other nodes depending on it.
 
 
-Contributors to the network enabled ALog: Luke Cesarz, Jeff Worm, David Nickel,
-Ying Yang, Bobby Schulz
-
 Data logger library for the Arduino-based ALog (http://northernwidget.com/?page_id=8)
