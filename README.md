@@ -1,3 +1,6 @@
+This is the network library for the ALog by Northern Widget. This was developed
+by Luke Cesarz, Jeff Worm, and David Nickel
+
 This repo contains 2 branches:
 master                      //Implemented with low power lab lib
 feather-version             //Implemented with feather
