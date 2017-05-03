@@ -17,7 +17,7 @@
  */
 #ifndef PACKET_H
 #define PACKET_H
-#define MAXDATASIZE 60
+#define MAXDATASIZE 59
 class Packet {
 public:
     Packet(){}
@@ -28,7 +28,7 @@ public:
     inline uint8_t getdAddr() { return dAddr; }
     inline uint8_t getdSize() { return dSize; }
     inline uint8_t getData(int index) { return data[index]; }
-    inline uint16_t getRSSI() { return RSSI; }
+    inline int8_t getRSSI() { return RSSI; }
 
     //setters
     inline void setopCode(uint8_t code) { this->opCode = code; }
@@ -36,7 +36,7 @@ public:
     inline void setdAddr(uint8_t dAddr) { this->dAddr = dAddr; }
     inline void setdSize(uint8_t dSize) { this->dSize = dSize; }
     inline void setdata(uint8_t data, int index) { this->data[index] = data; }
-    inline void setRSSI(uint16_t RSSI) { this->RSSI = RSSI; }
+    inline void setRSSI(int8_t RSSI) { this->RSSI = RSSI; }
 
 private:
     //parts of the packet structure
@@ -45,7 +45,7 @@ private:
     uint8_t dAddr; //Destination address
     uint8_t dSize; //Size of info in data
     uint8_t data[MAXDATASIZE]; //The data (optional)
-    uint16_t RSSI; //the signal strength
+    int8_t RSSI; //the signal strength
 };
 
 #endif
