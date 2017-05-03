@@ -1,6 +1,37 @@
-Logger
-======
-This code is heavily based off the Alog library by Northern Widget. When
+This repo contains 2 branches:
+master                      //Implemented with low power lab lib
+feather-version             //Implemented with feather
+
+The feather-version branch is the version of the code that was working on the
+M0. We had a zero acting as coord with two pros sending it data flawlessly.
+I think we then made a change to test something and broke it.
+
+Both libraries work with the arduino pro.
+
+The reason we have both libraries is SPI. SPI setup in the low power lab library
+is not working on the M0, but the SPI setup in feather does work with the M0.
+
+The issue in the feather-version can be described like so:
+When we get to transmission, the radio reaches a stand still and the code
+deadlocks. It is marked in the file where we suspect this is happening. It is in
+the RH_RF69.cpp file.
+
+It happens when we call sendToWait()
+
+
+The files we added:
+Network.h           //Self discovery algorithm and communication protocol
+Network.cpp         // ''
+Queue.cpp           //The queue for storing the data to send
+Queue.h             //''
+Packet.h            //The packet stucture we designed for communication
+
+
+
+DESCRIPTION OF HOW THE NETWORK: I WROTE THIS A WHILE AGO, BUT IT IS STILL A GOOD
+DESCRIPTION -LUKE
+
+This code is meant to interface with the Alog library by Northern Widget. When
 completed, this implementation will include radio telemetry using the RFM69 chip
 for RF communication. This library is currently a work in progress and should
 not be expected to work on its own. Expect a working copy in early May.
