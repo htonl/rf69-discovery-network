@@ -37,8 +37,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <RFM69.h>
-#include <SPI.h>
+#include <RH_RF69.h>
+#include <RHReliableDatagram.h>
 #include <Packet.h>
 #include <Queue.h>
 
@@ -46,7 +46,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define Network_h
 //radio globals
 //#define FREQUENCY     RF69_915MHZ
-const uint8_t radioChipSelectPin = 10; //TODO:this is just a random number, change it when the board layout is done
+#define INTERRUPTPIN 2
+#define CHIPSELECTPIN 10
     //RetVal
     enum retVal { SUCCESS, 		//Generic Success
         		  FAIL, 		//Generic Failure
@@ -62,15 +63,13 @@ const uint8_t radioChipSelectPin = 10; //TODO:this is just a random number, chan
 #define IAMCOORD 0x05 //no data
 
 /*Defining the packet*/
-#define MAXDATASIZE 60
+#define MAXDATASIZE 59
 #define BROADCASTADDRESS 255
-#define DEFAULTWAITTIME 10000 //10 seconds TBD
-#define COORDLISTENTIMEOUT 650
-#define ROUTERLISTENTIMEOUT 255
-#define LFCLISTENTIMEOUT 20 //TBD
-
-#define DROPPEDPACKETTIMEOUT 5 //TBD
-#define MINRSSI 0 //TBD, maybe leave 0
+#define COORDLISTENTIMEOUT 10
+#define SENDTIMEOUT 500
+#define SENDRETRIES 5
+#define RECEIVETIMEOUT 2500
+#define MINRSSI -128
 
 //These functions are just placeholders currently, as this code is currently
 //in development.
@@ -81,8 +80,8 @@ public:
     Network();
 
     //Network Functions:
-    //inits the network (main constructor) and sets the network ID
-    void initNetwork(uint8_t networkID);
+    //inits the network (main constructor)
+    void initNetwork();
 
     //handles the every wake network events
     void runNetwork();
@@ -97,7 +96,7 @@ public:
 	void setNextHop(int hop) { this->nextHop = hop; this->haveCoord = true;};
 
 	//Set myID (For testing)
-	void setmyID(int id) { this->myID = id; };
+	void setmyID(int id) { this->myID = id;};
 
 
 private:
@@ -127,14 +126,15 @@ private:
 
     //void setPath(uint8_t p[])
 
-    RFM69 radio; //the radio object
+    RH_RF69 driver; //the radio object, Chip select 5, interrupt pin 13
+    RHReliableDatagram radio;
     uint8_t myID; //TODO:set this from EEPROM in initialization
-    bool useAck = true; //do we want acks
+    //bool useAck = true; //do we want acks
     //bool 		encrypt = false;   //TODO:this will be implemented last
     //char 		*encryptKey;       //TODO:this will be implemented last
-    uint8_t networkID = 0;
+    //uint8_t networkID = 0;
     uint8_t nextHop;
-    uint16_t currentRSSI = 0;
+    int8_t currentRSSI = MINRSSI;
     bool haveCoord = false;
     bool amCoord = false;
     bool reconnected = false;
