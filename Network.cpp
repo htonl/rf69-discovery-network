@@ -18,11 +18,11 @@
  *
 ## LICENSE: GNU GPL v3
 
-Network.h is part of Logger, an Arduino library written by Andrew D. Wickert
-and Chad T. Sandell.
+Network.h is part of Logger, an Arduino library written by Luke Cesarz, Jeff Worm,
+David Nickel.
 
-Copyright (C) 2011-2015, Andrew D. Wickert<br>
-Copyright (C) 2016, Andrew D. Wickert and Chad T. Sandell
+Copyright (C) 2017-2019, Luke Cesarz, Jeff Worm, David Nickel<br>
+Copyright (C) 2017, 
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -65,9 +65,7 @@ void Network::initNetwork(uint8_t networkID)
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 retVal Network::readPacket(Packet* p)
 {
-    digitalWrite(radioChipSelectPin, LOW);
-    //TODO: set other chip selects high
-    if (this->radio.receiveDone()) {
+    if (this->radio.receiveDone()) { 
 	delay(15);
         p->setdSize(this->radio.DATALEN - 1);
         p->setsAddr(this->radio.SENDERID);
@@ -92,8 +90,6 @@ retVal Network::readPacket(Packet* p)
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 retVal Network::sendPacket(Packet* p)
 {
-    digitalWrite(radioChipSelectPin, LOW);
-    //TODO: set other chip selects high
     uint8_t data[p->getdSize() + 1];
     data[0] = p->getopCode();
     for (int i = 0; i < p->getdSize(); i++) {
